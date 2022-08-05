@@ -2,25 +2,71 @@ import csv
 import os
 import sys
 from typing import List
+from discord_dumper.utils import (
+    CSVWriteError,
+    GenericCall,
+    GenericMessage,
+    CSVFileError,
+)
 
-from discord_dumper.utils import GenericCall, GenericMessage
 
-def parse_records(csv_path: str) -> List[GenericCall | GenericMessage]:
-    """Reads the CSV file
+def __check_csv_path(path: str) -> bool:
+    """Checs if path to CSV file is valid
 
     Args:
-        csv_path (str): path to the file
+        path (str): path to check
 
     Returns:
-        List[GenericCall | GenericMessage]: List containing the records
+        bool: a boolean determining is a given path is valid
     """
 
-    if (not os.path.exists(csv_path) or not os.path.isfile(csv_path)):
-        raise FileNotFoundError(f'File {csv_path} could not be found')
+    return (
+        os.path.exists(path)
+        and os.path.isfile(path)
+        and os.path.splitext(path)[1] == ".csv"
+    )
 
-    buf = []
+
+def __get_recipient(sender: str) -> str:
+    """Gets the recipient of a message/call
+
+    Args:
+        sender (str): A person who sent the message
+
+    Returns:
+        str: A string containing the name of a recipient. If sender's name is not within a limited range of options, an empty string is returned
+    """
+    if sender not in ["Spazdikcnt#7451", "Nicky (the bi one) 🇷🇺#4173"]:
+        return ""
+
+    return (
+        "Nicky (the bi one) 🇷🇺#4173"
+        if sender == "Spazdikcnt#7451"
+        else "Spazdikcnt#7451"
+    )
+
+
+def __get_records(csv_path: str) -> List[GenericMessage | GenericCall]:
+    """Gets all the records from a CSV file and returns an array filled with corresponding classes
+
+    Args:
+        csv_path (str): path to the csv file
+
+    Raises:
+        CSVFileError: raised if path points to nothing, to something that is not a file or to a file with an unsupported extension
+
+    Returns:
+        List[GenericMessage | GenericCall]: _description_
+    """
+
+    if not __check_csv_path(csv_path):
+        raise CSVFileError(
+            f"File {csv_path} does not exist, not a file or has an unsupported format"
+        )
 
     line_count = 0
+
+    out = []
 
     with open(csv_path, encoding="utf-8") as db:
         reader = csv.reader(db)
@@ -31,62 +77,98 @@ def parse_records(csv_path: str) -> List[GenericCall | GenericMessage]:
                 continue
 
             if row[3].find("Started a call") != -1:
-                buf.append(GenericCall(row[1], "Nicky (the bi one) 🇷🇺#4173" if row[1] == "Spazdikcnt#7451" else "Spazdikcnt#7451", row[2], row[3]))
-            else:
-                buf.append(GenericMessage(row[1], "Nicky (the bi one) 🇷🇺#4173" if row[1] == "Spazdikcnt#7451" else "Spazdikcnt#7451", row[2], row[3], row[4] if row[4] else None))
+                out.append(
+                    GenericCall(
+                        row[1], __get_recipient(row[1]), row[2], row[3]
+                    )
+                )
+                line_count += 1
+                continue
 
-            line_count += 1
+            out.append(
+                GenericMessage(
+                    row[1], __get_recipient(row[1]), row[2], row[3], row[4]
+                )
+            )
 
-    return buf
+    return out
 
-def _write_to_calls_db(csv_path: str, items: List[GenericCall | GenericMessage]) -> None:
 
-    is_file_good = os.path.exists(csv_path) or os.path.isfile(csv_path)
+def get_calls(db_path: str) -> List[GenericCall]:
+    """Gets call history from a CSV database
 
-    if (is_file_good):
-        res = input(f"Warning! File {csv_path} already exists and will be overwritten. Proceed [Y/n]? ").lower()
+    Args:
+        db_path (str): path to a csv file
 
-        if (res == "n"):
-            print("Aborted")
+    Returns:
+        List[GenericCall]: List containing all the call records
+    """
+    records = __get_records(db_path)
+    return list(filter(lambda rec: isinstance(rec, GenericCall), records))
+
+
+def get_messages(db_path: str) -> List[GenericMessage]:
+    """Gets all the messages from a CSV database
+
+    Args:
+        db_path (str): path to a csv file
+
+    Returns:
+        List[GenericMessage]: List containing all the messages
+    """
+    records = __get_records(db_path)
+    return list(filter(lambda rec: isinstance(rec, GenericMessage), records))
+
+
+def write_to_csv(
+    path: str,
+    headers: List[str],
+    items: List[GenericCall] | List[GenericMessage],
+) -> None:
+    """Writes data to a CSV file.
+
+    Args:
+        path (str): path to a file. If file already exists, the fucntion will prompt the user.
+        headers (List[str]): CSV headers to write at the first line of the file
+        items (List[GenericCall] | List[GenericMessage]): rows to write
+
+    Raises:
+        CSVWriteError: raised if the type of items is not homogenous
+        CSVFileError: raised if path points to a non-csv file
+    """
+    if (not all([isinstance(x, GenericCall) for x in items])) and (
+        not all([isinstance(x, GenericMessage) for x in items])
+    ):
+        raise CSVWriteError(
+            f"Cannot write records of multiple types into one csv file"
+        )
+
+    if os.path.exists(path) and not os.path.isfile(path):
+        raise CSVFileError(f"{path} is not a file")
+
+    if os.path.splitext(path)[1] != ".csv":
+        raise CSVFileError("Cannot write to a non-csv file")
+
+    if os.path.exists(path):
+        answer = (
+            f"Warning! File {path} already exists. If continued, the contents of this file will be overwritten. Procced [Y/n]?"
+        ).lower()
+
+        if answer == "n":
+            print("Aborted by the user!")
             sys.exit(1)
-        elif (res == "y"):
-            pass
+        elif answer == "y":
+            print(f"Erasing the contents of {path}")
         else:
-            print('Unknown choice')
+            print(f"Unknown choice: {answer}")
             sys.exit(-1)
 
-    items = filter(lambda item: isinstance(item, GenericCall), items)
-
-    with open(csv_path, "w" if is_file_good else "x", encoding="utf-8") as db:
-        db.write("Caller,Recipient,Date,Time,Duration\n")
-
-        for i in items:
-            db.write(i.to_csv() + "\n")
-
-def _write_to_messages_db(csv_path: str, items: List[GenericCall | GenericMessage]) -> None:
-
-    is_file_good = os.path.exists(csv_path) or os.path.isfile(csv_path)
-
-    if (is_file_good):
-        res = input(f"Warning! File {csv_path} already exists and will be overwritten. Proceed [Y/n]? ").lower()
-
-        if (res == "n"):
-            print("Aborted")
-            sys.exit(1)
-        elif (res == "y"):
+    else:
+        with open(path, "x", encoding="utf-8"):
             pass
-        else:
-            print('Unknown choice')
-            sys.exit(-1)
 
-    items = filter(lambda item: isinstance(item, GenericMessage), items)
+    with open(path, "w", encoding="utf-8") as db:
+        db.write(f'{",".join(headers)}\n')
 
-    with open(csv_path, "w" if is_file_good else "x", encoding="utf-8") as db:
-        db.write("Author,Recipient,Date,Time,Content,Attachments\n")
-
-        for i in items:
-            db.write(i.to_csv() + "\n")
-
-def write_to_separate_dbs(name: str, items: List[GenericMessage | GenericCall]) -> None:
-    _write_to_calls_db(f"{name}_calls.csv", items)
-    _write_to_messages_db(f"{name}_messages.csv", items)
+        for item in items:
+            db.write(f"{item.to_csv()}\n")
