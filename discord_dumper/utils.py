@@ -78,3 +78,26 @@ class GenericCall:
 
         return f"\"{self.caller}\",\"{self.to}\",\"{self.date['date']}\",\"{self.date['time']}\",\"{self.get_duration()} minutes\""
 
+
+class CSVFileError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+    def __str__(self) -> str:
+        return super().__str__()
+
+
+class CSVWriteError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+    def __str__(self) -> str:
+        return super().__str__()
+
+
+class TemplateError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+    def __str__(self) -> str:
+        return super().__str__()
