@@ -36,13 +36,16 @@ def __get_recipient(sender: str) -> str:
     Returns:
         str: A string containing the name of a recipient. If sender's name is not within a limited range of options, an empty string is returned
     """
-    if sender not in ["Spazdikcnt#7451", "Nicky (the bi one) 🇷🇺#4173"]:
+    if sender not in [
+        "AFRY (The Australian One)#7451",
+        "Nicky (the russian one)#4173",
+    ]:
         return ""
 
     return (
-        "Nicky (the bi one) 🇷🇺#4173"
-        if sender == "Spazdikcnt#7451"
-        else "Spazdikcnt#7451"
+        "Nicky (the russian one)#4173"
+        if sender == "AFRY (The Australian One)#7451"
+        else "AFRY (The Australian One)#7451"
     )
 
 
