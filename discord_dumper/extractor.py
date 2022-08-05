@@ -153,8 +153,8 @@ def write_to_csv(
         raise CSVFileError("Cannot write to a non-csv file")
 
     if os.path.exists(path):
-        answer = (
-            f"Warning! File {path} already exists. If continued, the contents of this file will be overwritten. Procced [Y/n]?"
+        answer = input(
+            f"Warning! File {path} already exists. If continued, the contents of this file will be overwritten. Procced [Y/n]? "
         ).lower()
 
         if answer == "n":
