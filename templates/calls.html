@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Template was created by Nikolai Beloguzov -->
+    <title>Nikolai Beloguzov -- Call history</title>
+    <style>
+        body {
+            padding: 40px 50px 40px 50px;
+        }
+
+        #description {
+            width: max(580px, 100%)
+        }
+
+        #title {
+            font-family: 'Verdana', sans-serif;
+            font-weight: bold;
+            font-size: 48px;
+        }
+
+        #short-desc {
+            margin-top: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: 400;
+            font-size: 24px;
+        }
+
+        #call-logs-table {
+            width: 100%;
+            margin-top: 9px;
+        }
+
+        .clt-row {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 24px;
+            border: 10px solid black
+        }
+
+        #clt-header {
+            height: 63px;
+        }
+
+        .clt-item {
+            padding: 6px 5px 6px 5px;
+            border-top: 1px solid black
+        }
+
+        .clt-row:last-child>.clt-item {
+            border-bottom: 1px solid black
+        }
+
+        .clt-header-item {
+            text-align: start;
+            vertical-align: bottom;
+        }
+
+        #timestamp {
+            color: rgb(99, 99, 99);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+        #timestamp-date {
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="description">
+        <div id="title">Call history</div>
+        <div id="short-desc">This table contains Discord calls between Jack Hill and Nikolai Beloguzov</div>
+    </div>
+    <div id="call-logs-container">
+        <table id="call-logs-table">
+            <tr id="clt-header" class="clt-row">
+                <th class="clt-header-item clt-item" style="width: 5%">#</th>
+                <th class="clt-header-item clt-item" style="width: 20%">Date and time</th>
+                <th class="clt-header-item clt-item" style="width: 30%">Caller</th>
+                <th class="clt-header-item clt-item" style="width: 30%">Recipient</th>
+                <th class="clt-header-item clt-item" style="width: 15%">Duration</th>
+            </tr>
+        </table>
+        <div id="timestamp">Created on <span id="timestamp-date"></span></div>
+    </div>
+</body>
+
+</html>
