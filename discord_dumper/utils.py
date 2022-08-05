@@ -3,9 +3,16 @@ import re
 from types import SimpleNamespace
 from typing import Any
 
-class GenericMessage:
 
-    def __init__(self, sender: str, to: str, date_string: str, content: str, attachments: str | None) -> None:
+class GenericMessage:
+    def __init__(
+        self,
+        sender: str,
+        to: str,
+        date_string: str,
+        content: str,
+        attachments: str | None,
+    ) -> None:
         """Creates a GenericMessage object
 
         Args:
@@ -15,29 +22,33 @@ class GenericMessage:
             content (str): message itself
             attachments (str | None): attachments
         """
-        
+
         self.DATE_FORMAT_CONST = "%d-%b-%y %I:%M %p"
 
         self.author = sender
         self.to = to
 
         # This breakdown is needed for more efficient CSV dump later
-        
-        self.timestamp = dtime.datetime.strptime(date_string, self.DATE_FORMAT_CONST)
+
+        self.timestamp = dtime.datetime.strptime(
+            date_string, self.DATE_FORMAT_CONST
+        )
         self.date = {
             "date": dtime.datetime.strftime(self.timestamp, "%d/%m/%Y"),
-            "time": dtime.datetime.strftime(self.timestamp, "%H:%M")
+            "time": dtime.datetime.strftime(self.timestamp, "%H:%M"),
         }
 
         self.content = content
         self.attachments = attachments
-    
+
     def to_csv(self) -> str:
         return f"\"{self.author}\",\"{self.to}\",\"{self.date['date']}\",\"{self.date['time']}\",\"{self.content}\",\"{self.attachments if self.attachments else ''}\""
 
 
 class GenericCall:
-    def __init__(self, caller: str, to: str, date_string: str, service_message: str) -> None:
+    def __init__(
+        self, caller: str, to: str, date_string: str, service_message: str
+    ) -> None:
         """Creates a GenericCall object
 
         Args:
@@ -53,11 +64,13 @@ class GenericCall:
         self.to = to
 
         # This breakdown is needed for more efficient CSV dump later
-        
-        self.timestamp = dtime.datetime.strptime(date_string, self.DATE_FORMAT_CONST)
+
+        self.timestamp = dtime.datetime.strptime(
+            date_string, self.DATE_FORMAT_CONST
+        )
         self.date = {
             "date": dtime.datetime.strftime(self.timestamp, "%d/%m/%Y"),
-            "time": dtime.datetime.strftime(self.timestamp, "%H:%M")
+            "time": dtime.datetime.strftime(self.timestamp, "%H:%M"),
         }
         self.service_message = service_message
 
@@ -68,7 +81,7 @@ class GenericCall:
             int: the duration of the call in minutes
         """
 
-        re_pattern = re.compile(r'\d+')
+        re_pattern = re.compile(r"\d+")
 
         dur = int(re.findall(re_pattern, self.service_message)[0])
 
